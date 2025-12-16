@@ -150,6 +150,7 @@ def create_agent() -> Agent:
         retries=retries,
         system_prompt=system_prompt,
         deps_type=Deps,
+        instrument=True
     )
     
     # Register the retrieve tool

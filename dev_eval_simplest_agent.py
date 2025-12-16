@@ -79,7 +79,7 @@ def judge_single_question(span):
     }
 
 
-@add_tracing(name='single_question_agent', autolog_frameworks=["pydantic_ai"], evaluator=judge_single_question)
+@add_tracing(name='simple_rag_agent', autolog_frameworks=["pydantic_ai"], evaluator=judge_single_question)
 def process_single_question(data_point: Dict[str, Any]) -> Dict[str, Any]:
     """
     Process a single question with its own trace context
