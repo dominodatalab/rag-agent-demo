@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document RAG Agent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-icon">🤖</div>
+        <div class="header-content">
+            <h1>Document RAG Agent</h1>
+            <p>Document RAG Agent. Ask me anything</p>
+        </div>
+        <div class="status-indicator">
+            <div class="status-dot"></div>
+            <span>Online</span>
+        </div>
+    </header>
+    
+    <main id="chatContainer" class="chat-container">
+        <div class="welcome-container" id="welcomeScreen">
+            <div class="welcome-icon">✨</div>
+            <h2>How can I help you today?</h2>
+            <p>I'm a Document RAG Agent ready to answer your questions. Just type a message below to get started.</p>
+            <div class="suggestions">
+                <button class="suggestion" data-suggestion="Why is the sky blue?">Why is the sky blue?</button>
+                <button class="suggestion" data-suggestion="What is the meaning of life?">What is the meaning of life?</button>
+                <button class="suggestion" data-suggestion="Tell me something interesting">Tell me something interesting</button>
+            </div>
+        </div>
+    </main>
+    
+    <footer class="input-area">
+        <div class="input-wrapper">
+            <input 
+                type="text" 
+                id="messageInput" 
+                placeholder="Type your message..." 
+                autocomplete="off"
+            />
+            <button id="sendBtn">
+                <span>Send</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
+
