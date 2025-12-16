@@ -68,7 +68,9 @@ def retrieve(context: RunContext[Deps], search_query: str) -> str:
     
     all_results = []
     
-    for collection_name in collections:
+    for col in collections:
+        # Handle both string names and Collection objects (ChromaDB version compatibility)
+        collection_name = col.name if hasattr(col, 'name') else col
         try:
             collection = client.get_collection(
                 collection_name, 
@@ -91,7 +93,7 @@ def retrieve(context: RunContext[Deps], search_query: str) -> str:
                     all_results.append((distance or 0, result_text))
                     
         except Exception as e:
-            print(f"Error querying collection {collection_name}: {e}")
+            print(f"Error querying collection Collection(name={collection_name}): {e}")
             continue
     
     if not all_results:
@@ -193,7 +195,9 @@ if __name__ == "__main__":
         print("No collections found! Please run init_chromadb.py first.")
         sys.exit(1)
     
-    print(f"Available collections: {collections}")
+    # Handle both string names and Collection objects (ChromaDB version compatibility)
+    collection_names = [c.name if hasattr(c, 'name') else c for c in collections]
+    print(f"Available collections: {collection_names}")
     print("-" * 50)
     
     # Example query

@@ -31,7 +31,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(SCRIPT_DIR, "static")
 
 # Load configuration from YAML file
-config_path = os.path.join(SCRIPT_DIR, 'ai_system_config.yaml')
+config_path = os.path.join(SCRIPT_DIR, 'rag_agent_config.yaml')
 
 app = FastAPI(title="Simple Agent Chat", description="Chat interface for the simple agent")
 

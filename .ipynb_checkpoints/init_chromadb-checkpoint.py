@@ -14,6 +14,8 @@ python init_chromadb.py
 
 import os
 import sys
+import warnings
+
 # Suppress macOS msgtracer warnings from onnxruntime
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["OMP_NUM_THREADS"] = "1"
@@ -222,19 +224,21 @@ def initialize_chromadb():
                 print(f"  Skipping - no chunks created")
                 continue
             
-            # Delete existing collection if it exists (to refresh data)
-            try:
-                client.delete_collection(collection_name)
-                print(f"  Deleted existing collection")
-            except ValueError:
-                pass  # Collection doesn't exist
-            
-            # Create new collection with specified embedding function
-            collection = client.create_collection(
+            # Create or get existing collection
+            collection = client.get_or_create_collection(
                 name=collection_name,
                 metadata={"source_file": doc_path.name},
                 embedding_function=embedding_fn
             )
+
+            # Clear existing documents if any (for refresh)
+            existing_count = collection.count()
+            if existing_count > 0:
+                # Get all existing IDs and delete them
+                existing = collection.get()
+                if existing['ids']:
+                    collection.delete(ids=existing['ids'])
+                print(f"  Cleared {existing_count} existing chunks")
             
             # Add chunks to collection
             ids = [f"{collection_name}_chunk_{i}" for i in range(len(chunks))]
@@ -282,12 +286,11 @@ def query_collection(collection_name: str, query: str, n_results: int = 3):
     
     try:
         collection = client.get_collection(collection_name, embedding_function=embedding_fn)
-        # Suppress ONNX stderr messages during embedding
-        with suppress_stderr():
-            results = collection.query(
-                query_texts=[query],
-                n_results=n_results
-            )
+        
+        results = collection.query(
+            query_texts=[query],
+            n_results=n_results
+        )
         return results
     except ValueError as e:
         print(f"Collection '{collection_name}' not found: {e}")
@@ -326,4 +329,3 @@ if __name__ == "__main__":
         print("\n✓ ChromaDB initialization and test complete!")
     else:
         print("\nNo collections found to test.")
-

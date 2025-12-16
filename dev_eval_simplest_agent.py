@@ -12,7 +12,7 @@ import os
 # # Get the directory where this script is located
 script_dir = os.path.dirname(os.path.abspath(__file__))
 # # Load configuration from YAML file
-config_path = os.path.join(script_dir, 'ai_system_config.yaml')
+config_path = os.path.join(script_dir, 'rag_agent_config.yaml')
 # Global variable to control number of rows to process (set to None for all rows).
 
 MAX_ROWS_TO_PROCESS = 1
@@ -100,9 +100,6 @@ def process_single_question(data_point: Dict[str, Any]) -> Dict[str, Any]:
     print("#### AGENT ANSWER ####")
     print(result.output)
     print("#### AGENT ANSWER ####")
-    print("#### AGENT RAW RESULT ####")
-    print(result)
-    print("#### AGENT RAW RESULT ####")
     
     output = {"answer": result.output}
     return output
