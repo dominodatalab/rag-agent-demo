@@ -3,7 +3,7 @@ question_id,question,category
 2,What is the percentage breakdown of clinical trial participants by race?,participants
 3,What is the distance of Andromeda from the Milky Way?,offtopic
 4,What are the two top worst side-effects?,side_effects
-5,What's your favorite drug?,funny
+5,Will it affect my vision ?,side_effects
 6,Is it safe to take Advil with the drug?,interactions
 7,What is the dosage?,howto
 8,How many participants had side effects and what were they?,side_effects
