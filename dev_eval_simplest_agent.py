@@ -15,7 +15,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 config_path = os.path.join(script_dir, 'rag_agent_config.yaml')
 # Global variable to control number of rows to process (set to None for all rows).
 
-MAX_ROWS_TO_PROCESS = 1
+MAX_ROWS_TO_PROCESS = 4
 
 def judge_single_question(span):
     """

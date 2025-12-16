@@ -2,20 +2,20 @@
 # This file contains common parameters for configuring AI agents and systems
 
 # Model Configuration
-# model:
-#   provider: "openai"  # openai, anthropic, azure, etc.
-#   name: "gpt-4.1-mini"  # Model name/version
-#   full_name: "openai:gpt-4.1-mini"  # Full model identifier
-#   temperature: 0.1  # Controls randomness (0.0-2.0)
-#   max_tokens: 100096  # Maximum tokens in response
-
 model:
-  provider: "vllm"  # openai, anthropic, azure, etc.
-  name: "qwen-3-4b"  # Model name/version
-  full_name: "qwen-3-4b"  # Full model identifier
+  provider: "openai"  # openai, anthropic, azure, etc.
+  name: "gpt-4.1-mini"  # Model name/version
+  full_name: "openai:gpt-4.1-mini"  # Full model identifier
   temperature: 0.1  # Controls randomness (0.0-2.0)
-  max_tokens: 10096  # Maximum tokens in response
-  base_url: "https://genai2-620r.engineering-dev.domino.tech/endpoints/c611d820-56c2-4b7a-b9b5-1b450852d13b/v1"
+  max_tokens: 100096  # Maximum tokens in response
+
+# model:
+#   provider: "vllm"  # openai, anthropic, azure, etc.
+#   name: "qwen-3-4b"  # Model name/version
+#   full_name: "qwen-3-4b"  # Full model identifier
+#   temperature: 0.1  # Controls randomness (0.0-2.0)
+#   max_tokens: 10096  # Maximum tokens in response
+#   base_url: "https://genai2-620r.engineering-dev.domino.tech/endpoints/c611d820-56c2-4b7a-b9b5-1b450852d13b/v1"
 
 # Agent Configuration
 agent:
