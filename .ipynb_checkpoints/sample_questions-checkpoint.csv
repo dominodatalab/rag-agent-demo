@@ -1,0 +1,16 @@
+question_id,question,category
+1,Are there any side-effects related to my GI?,side_effects
+2,What is the percentage breakdown of clinical trial participants by race?,participants
+3,What is the distance of Andromeda from the Milky Way?,offtopic
+4,What are the two top worst side-effects?,side_effects
+5,What's your favorite drug?,funny
+6,Is it safe to take Advil with the drug?,interactions
+7,What is the dosage?,howto
+8,How many participants had side effects and what were they?,side_effects
+9,What drug is most dangerous to take along with this drug?,interactions
+10,Who should not use this drug?,howto
+11,What company made this drug?,business
+12,Were any participants of Chinese heritage? How many?,participants
+13,Were any participants Hispantic? How many?,participants
+14,Is it possible to overdose on this drug? What happens if you take too much?,howto
+15,What is the purpose of the spleen?,biology
