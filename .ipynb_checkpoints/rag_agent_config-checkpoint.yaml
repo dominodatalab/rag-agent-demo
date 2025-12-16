@@ -15,7 +15,8 @@ model:
   full_name: "qwen-3-4b"  # Full model identifier
   temperature: 0.1  # Controls randomness (0.0-2.0)
   max_tokens: 10096  # Maximum tokens in response
-  base_url: "https://genai2-620r.engineering-dev.domino.tech/endpoints/c611d820-56c2-4b7a-b9b5-1b450852d13b/v1"
+  base_url: "https://genai2-620r.engineering-dev.domino.tech/endpoints/ebde3675-d4e2-4e05-9cd0-558dff691620/v1"
+  #base_url: "https://genai2-620r.engineering-dev.domino.tech/endpoints/c611d820-56c2-4b7a-b9b5-1b450852d13b/v1"
 
 # Agent Configuration
 agent:
