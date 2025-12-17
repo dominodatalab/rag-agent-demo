@@ -9,6 +9,10 @@ from pydantic import BaseModel
 from typing import Dict, Any, Annotated
 import csv
 import os
+import mlflow
+
+# Accumulator for retrieval distances across all questions
+all_retrieval_distances = []
 # # Get the directory where this script is located
 script_dir = os.path.dirname(os.path.abspath(__file__))
 # # Load configuration from YAML file
@@ -65,6 +69,24 @@ def judge_single_question(span):
     print(f"Accuracy: {evaluation_result.accuracy_score:.3f} (higher is better)")
     print(f"Overall: {evaluation_result.overall_score:.3f}")
     print("#### EVALUATION SCORES ####")
+
+    print("#### RAW SPAN ####")
+    print(span.attributes)
+    print("#### RAW SPAN ####")
+    # Extract retrieval distances from span attributes if present
+    # The retrieve tool sets these on its span - check for nested spans
+    if hasattr(span, 'attributes'):
+        attrs = span.attributes if isinstance(span.attributes, dict) else {}
+        if 'retrieval_min_distance' in attrs:
+            all_retrieval_distances.append(attrs['retrieval_min_distance'])
+    
+    # Also check child spans if available
+    if hasattr(span, 'children'):
+        for child in span.children:
+            if hasattr(child, 'attributes'):
+                child_attrs = child.attributes if isinstance(child.attributes, dict) else {}
+                if 'retrieval_min_distance' in child_attrs:
+                    all_retrieval_distances.append(child_attrs['retrieval_min_distance'])
     
     # Return the evaluation metrics with proper naming
     return {
@@ -157,12 +179,25 @@ def main():
     Main function - you can modify this to call either agent_caller() for single test
     or test_agent_caller() for batch testing with the CSV dataset
     """
+    global all_retrieval_distances
+    all_retrieval_distances = []  # Reset accumulator
+    
     with DominoRun(agent_config_path=config_path) as run:
         # Uncomment the line below to test with a single question
         # agent_caller()
         
         # Uncomment the line below to test with the full CSV dataset
         test_agent_caller()
+        
+        # Log aggregated retrieval distance metrics to the run
+        if all_retrieval_distances:
+            mlflow.log_metric("retrieval_mean_distance", sum(all_retrieval_distances) / len(all_retrieval_distances))
+            mlflow.log_metric("retrieval_min_distance", min(all_retrieval_distances))
+            mlflow.log_metric("retrieval_max_distance", max(all_retrieval_distances))
+            print(f"\n📊 Logged retrieval distance aggregates to run:")
+            print(f"   Mean: {sum(all_retrieval_distances) / len(all_retrieval_distances):.4f}")
+            print(f"   Min:  {min(all_retrieval_distances):.4f}")
+            print(f"   Max:  {max(all_retrieval_distances):.4f}")
         
 if __name__ == "__main__":
     main()

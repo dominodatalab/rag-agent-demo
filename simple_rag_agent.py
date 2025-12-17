@@ -105,13 +105,11 @@ def retrieve(context: RunContext[Deps], search_query: str) -> str:
     
     # Log distances to MLflow span
     distances = [d for d, _ in top_results]
-    
-    # might interfere with LLM being part of trace
-    # span = mlflow.get_current_active_span()
-    # if span:
-    #     span.set_attribute("retrieval_distances", distances)
-    #     span.set_attribute("retrieval_min_distance", min(distances))
-    #     span.set_attribute("retrieval_mean_distance", sum(distances) / len(distances))
+    span = mlflow.get_current_active_span()
+    if span:
+        span.set_attribute("retrieval_distances", distances)
+        span.set_attribute("retrieval_min_distance", min(distances))
+        span.set_attribute("retrieval_mean_distance", sum(distances) / len(distances))
     
     # Format output
     articles = "\n\n---\n\n".join([r[1] for r in top_results])
