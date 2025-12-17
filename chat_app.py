@@ -64,6 +64,18 @@ async def ask_agent(question):
     deps = create_deps()
     result = await agent.run(question, deps=deps)
     #result = agent.run_sync(question, deps=deps)
+    print("*** OUTSIDE SPAN: ****")
+    # Get trace ID from the active span
+    span = mlflow.get_current_active_span()
+    if span: # and retrieval_distance_accumulator:
+        print("*** INSIDE SPAN: ****")
+        print(retrieval_distance_accumulator)
+        trace_id = span.trace_id
+        log_evaluation(trace_id=trace_id, name="retrieval_mean_distance", value=sum(retrieval_distance_accumulator) / len(retrieval_distance_accumulator))
+        log_evaluation(trace_id=trace_id, name="retrieval_min_distance", value=min(retrieval_distance_accumulator))
+        log_evaluation(trace_id=trace_id, name="retrieval_max_distance", value=max(retrieval_distance_accumulator))
+        # Clear the accumulator before next query
+        retrieval_distance_accumulator.clear()
     return result
 
 @app.post("/chat")
@@ -75,22 +87,12 @@ async def chat(request: ChatMessage) -> ChatResponse:
         # Run the agent with the user's message
         with DominoRun(agent_config_path=config_path) as run:
             result = await ask_agent(request.message)
-            print("*** OUTSIDE SPAN: ****")
-            # Get trace ID from the active span
-            span = mlflow.get_current_active_span()
-            if span: # and retrieval_distance_accumulator:
-                print("*** INSIDE SPAN: ****")
-                print(retrieval_distance_accumulator)
-                trace_id = span.trace_id
-                log_evaluation(trace_id=trace_id, name="retrieval_mean_distance", value=sum(retrieval_distance_accumulator) / len(retrieval_distance_accumulator))
-                log_evaluation(trace_id=trace_id, name="retrieval_min_distance", value=min(retrieval_distance_accumulator))
-                log_evaluation(trace_id=trace_id, name="retrieval_max_distance", value=max(retrieval_distance_accumulator))
+
             
         # Generate or use existing conversation ID
         conv_id = request.conversation_id or str(id(request))
 
-        # Clear the accumulator before next query
-        retrieval_distance_accumulator.clear()
+        
         return ChatResponse(
             response=result.output,
             conversation_id=conv_id
