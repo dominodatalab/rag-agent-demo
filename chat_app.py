@@ -64,12 +64,10 @@ async def ask_agent(question):
     deps = create_deps()
     result = await agent.run(question, deps=deps)
     #result = agent.run_sync(question, deps=deps)
-    print("*** OUTSIDE SPAN: ****")
+    
     # Get trace ID from the active span
     span = mlflow.get_current_active_span()
-    if span: # and retrieval_distance_accumulator:
-        print("*** INSIDE SPAN: ****")
-        print(retrieval_distance_accumulator)
+    if span:
         trace_id = span.trace_id
         log_evaluation(trace_id=trace_id, name="retrieval_mean_distance", value=sum(retrieval_distance_accumulator) / len(retrieval_distance_accumulator))
         log_evaluation(trace_id=trace_id, name="retrieval_min_distance", value=min(retrieval_distance_accumulator))
