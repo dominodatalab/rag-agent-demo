@@ -13,18 +13,18 @@ from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
+import mlflow
+from domino.agents.tracing import add_tracing
+from domino.agents.logging import DominoRun, log_evaluation
+
+# Import the agent factory from simple_rag_agent.py
+# We use create_agent() to get a fresh agent with a new API key before each request
+# since the VLLM_API_KEY expires every 5 minutes
+from simple_rag_agent import create_agent, create_deps, retrieval_distance_accumulator
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-
-from domino.agents.tracing import add_tracing
-from domino.agents.logging import DominoRun
-
-# Import the agent factory from simplest_agent.py
-# We use create_agent() to get a fresh agent with a new API key before each request
-# since the VLLM_API_KEY expires every 5 minutes
-from simple_rag_agent import create_agent, create_deps
 
 # Get the directory where this script is located
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -75,10 +75,20 @@ async def chat(request: ChatMessage) -> ChatResponse:
         # Run the agent with the user's message
         with DominoRun(agent_config_path=config_path) as run:
             result = await ask_agent(request.message)
-        
+            
+            # Get trace ID from the active span
+            span = mlflow.get_current_active_span()
+            if span and retrieval_distance_accumulator:
+                trace_id = span.trace_id
+                log_evaluation(trace_id=trace_id, name="retrieval_mean_distance", value=sum(retrieval_distance_accumulator) / len(retrieval_distance_accumulator))
+                log_evaluation(trace_id=trace_id, name="retrieval_min_distance", value=min(retrieval_distance_accumulator))
+                log_evaluation(trace_id=trace_id, name="retrieval_max_distance", value=max(retrieval_distance_accumulator))
+            
         # Generate or use existing conversation ID
         conv_id = request.conversation_id or str(id(request))
-        
+
+        # Clear the accumulator before next query
+        retrieval_distance_accumulator.clear()
         return ChatResponse(
             response=result.output,
             conversation_id=conv_id

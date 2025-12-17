@@ -1,6 +1,6 @@
 from evaluation_library import AgentEvaluator
 #from simplest_agent import simplest_agent
-from simple_rag_agent import create_agent, create_deps
+from simple_rag_agent import create_agent, create_deps, retrieval_distance_accumulator
 from domino.agents.tracing import add_tracing, search_traces
 from domino.agents.logging import DominoRun,log_evaluation
 
@@ -10,9 +10,6 @@ from typing import Dict, Any, Annotated
 import csv
 import os
 import mlflow
-
-# Accumulator for retrieval distances across all questions
-all_retrieval_distances = []
 # # Get the directory where this script is located
 script_dir = os.path.dirname(os.path.abspath(__file__))
 # # Load configuration from YAML file
@@ -49,7 +46,7 @@ def judge_single_question(span):
     
     # Get the agent output from the result
     agent_output = output['answer']
-    
+    #distances = output['distances']
     # Perform evaluation here
     
     evaluation_metadata = {
@@ -68,25 +65,13 @@ def judge_single_question(span):
     print(f"Relevancy: {evaluation_result.relevancy_score:.3f} (higher is better)")
     print(f"Accuracy: {evaluation_result.accuracy_score:.3f} (higher is better)")
     print(f"Overall: {evaluation_result.overall_score:.3f}")
-    print("#### EVALUATION SCORES ####")
-
-    print("#### RAW SPAN ####")
-    print(span.attributes)
-    print("#### RAW SPAN ####")
-    # Extract retrieval distances from span attributes if present
-    # The retrieve tool sets these on its span - check for nested spans
-    if hasattr(span, 'attributes'):
-        attrs = span.attributes if isinstance(span.attributes, dict) else {}
-        if 'retrieval_min_distance' in attrs:
-            all_retrieval_distances.append(attrs['retrieval_min_distance'])
     
-    # Also check child spans if available
-    if hasattr(span, 'children'):
-        for child in span.children:
-            if hasattr(child, 'attributes'):
-                child_attrs = child.attributes if isinstance(child.attributes, dict) else {}
-                if 'retrieval_min_distance' in child_attrs:
-                    all_retrieval_distances.append(child_attrs['retrieval_min_distance'])
+    print(f"\nLogged retrieval distance aggregates to run:")
+    print(retrieval_distance_accumulator)
+    print(f"   Mean: {sum(retrieval_distance_accumulator) / len(retrieval_distance_accumulator):.4f}")
+    print(f"   Min:  {min(retrieval_distance_accumulator):.4f}")
+    print(f"   Max:  {max(retrieval_distance_accumulator):.4f}")
+    print("#### EVALUATION SCORES ####")
     
     # Return the evaluation metrics with proper naming
     return {
@@ -96,7 +81,10 @@ def judge_single_question(span):
         "toxicity_score": evaluation_result.toxicity_score,
         "relevancy_score": evaluation_result.relevancy_score, 
         "accuracy_score": evaluation_result.accuracy_score,
-        "overall_score": evaluation_result.overall_score
+        "overall_score": evaluation_result.overall_score,
+        "retrieval_mean_distance": sum(retrieval_distance_accumulator) / len(retrieval_distance_accumulator),
+        "retrieval_min_distance": min(retrieval_distance_accumulator),
+        "retrieval_max_distance": max(retrieval_distance_accumulator),
         # "has_evaluation": True
     }
 
@@ -123,7 +111,10 @@ def process_single_question(data_point: Dict[str, Any]) -> Dict[str, Any]:
     print(result.output)
     print("#### AGENT ANSWER ####")
     
-    output = {"answer": result.output}
+    # # Clear the accumulator before starting
+    # retrieval_distance_accumulator.clear()
+    
+    output = {"answer": result.output} #, "distances": simple_rag_agent.retrieval_distance_accumulator}
     return output
 
     
@@ -160,7 +151,9 @@ def test_agent_caller():
             #result = process_single_question(question_id, question, category)
             result = process_single_question(row)
             results.append(result)
-    
+            # Clear the accumulator before starting
+            retrieval_distance_accumulator.clear()
+            
     print(f"\n{'='*60}")
     print(f"BATCH TEST COMPLETE")
     print(f"Total questions processed: {len(results)}")
@@ -179,8 +172,7 @@ def main():
     Main function - you can modify this to call either agent_caller() for single test
     or test_agent_caller() for batch testing with the CSV dataset
     """
-    global all_retrieval_distances
-    all_retrieval_distances = []  # Reset accumulator
+    
     
     with DominoRun(agent_config_path=config_path) as run:
         # Uncomment the line below to test with a single question
@@ -189,15 +181,10 @@ def main():
         # Uncomment the line below to test with the full CSV dataset
         test_agent_caller()
         
-        # Log aggregated retrieval distance metrics to the run
-        if all_retrieval_distances:
-            mlflow.log_metric("retrieval_mean_distance", sum(all_retrieval_distances) / len(all_retrieval_distances))
-            mlflow.log_metric("retrieval_min_distance", min(all_retrieval_distances))
-            mlflow.log_metric("retrieval_max_distance", max(all_retrieval_distances))
-            print(f"\n📊 Logged retrieval distance aggregates to run:")
-            print(f"   Mean: {sum(all_retrieval_distances) / len(all_retrieval_distances):.4f}")
-            print(f"   Min:  {min(all_retrieval_distances):.4f}")
-            print(f"   Max:  {max(all_retrieval_distances):.4f}")
+        
+        
+            
+            
         
 if __name__ == "__main__":
     main()

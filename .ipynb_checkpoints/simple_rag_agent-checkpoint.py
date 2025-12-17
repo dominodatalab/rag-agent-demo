@@ -32,6 +32,9 @@ embedding_model = config.get('embeddings', {}).get('model', 'all-MiniLM-L6-v2')
 # ChromaDB setup
 CHROMA_PERSIST_DIR = script_dir / "chroma_db"
 
+# Accumulator for retrieval distances (used for run-level aggregation)
+retrieval_distance_accumulator = []
+
 # Create embedding function (must match what was used during indexing)
 embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
     model_name=embedding_model
@@ -111,6 +114,9 @@ def retrieve(context: RunContext[Deps], search_query: str) -> str:
         span.set_attribute("retrieval_min_distance", min(distances))
         span.set_attribute("retrieval_mean_distance", sum(distances) / len(distances))
     
+    # Add all distances to accumulator for run-level aggregation
+    retrieval_distance_accumulator.extend(distances)
+    
     # Format output
     articles = "\n\n---\n\n".join([r[1] for r in top_results])
     # print ("## articles from retreiver ##")
@@ -163,10 +169,6 @@ def create_deps(n_results: int = 5) -> Deps:
         chroma_client=chroma_client,
         n_results=n_results
     )
-
-
-
-
 
 async def ask(question: str, n_results: int = 5) -> str:
     """
