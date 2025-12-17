@@ -78,7 +78,7 @@ async def chat(request: ChatMessage) -> ChatResponse:
             print("*** OUTSIDE SPAN: ****")
             # Get trace ID from the active span
             span = mlflow.get_current_active_span()
-            if span and retrieval_distance_accumulator:
+            if span: # and retrieval_distance_accumulator:
                 print("*** INSIDE SPAN: ****")
                 print(retrieval_distance_accumulator)
                 trace_id = span.trace_id
