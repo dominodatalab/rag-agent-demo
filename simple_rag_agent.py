@@ -122,7 +122,8 @@ def retrieve(context: RunContext[Deps], search_query: str) -> str:
     # print ("## articles from retreiver ##")
     # print(all_results)
     # print ("## articles from retreiver ##")
-    return f"Retrieved {len(top_results)} relevant document sections:\n\n{articles}"
+    #return f"Retrieved {len(top_results)} relevant document sections:\n\n{articles}"
+    return {"articles": f"Retrieved {len(top_results)} relevant document sections:\n\n{articles}"
 
 
 
