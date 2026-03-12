@@ -69,9 +69,10 @@ async def ask_agent(question):
     span = mlflow.get_current_active_span()
     if span:
         trace_id = span.trace_id
-        log_evaluation(trace_id=trace_id, name="retrieval_mean_distance", value=sum(retrieval_distance_accumulator) / len(retrieval_distance_accumulator))
-        log_evaluation(trace_id=trace_id, name="retrieval_min_distance", value=min(retrieval_distance_accumulator))
-        log_evaluation(trace_id=trace_id, name="retrieval_max_distance", value=max(retrieval_distance_accumulator))
+        if retrieval_distance_accumulator:
+            log_evaluation(trace_id=trace_id, name="retrieval_mean_distance", value=sum(retrieval_distance_accumulator) / len(retrieval_distance_accumulator))
+            log_evaluation(trace_id=trace_id, name="retrieval_min_distance", value=min(retrieval_distance_accumulator))
+            log_evaluation(trace_id=trace_id, name="retrieval_max_distance", value=max(retrieval_distance_accumulator))
         # Clear the accumulator before next query
         retrieval_distance_accumulator.clear()
     return result
