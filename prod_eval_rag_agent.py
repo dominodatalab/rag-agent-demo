@@ -66,23 +66,36 @@ def main():
     traces_count = 0
     
     for trace in traces.data:
-        question = trace.spans[0].inputs.get("question")
-        agent_output = trace.spans[0].outputs.get("output")
+        try:
+            span = trace.spans[0]
+            if not span.inputs or not span.outputs:
+                print(f"Skipping trace {trace.id}: missing inputs or outputs")
+                continue
 
-        evaluation_result = evaluator.evaluate_response(
-            query=question,
-            agent_output=agent_output,
-            metadata={}
-        )
-        
-        log_evaluation(trace_id=trace.id, name='toxicity_score', value=evaluation_result.toxicity_score)
-        log_evaluation(trace_id=trace.id, name='relevancy_score', value=evaluation_result.relevancy_score)
-        log_evaluation(trace_id=trace.id, name='accuracy_score', value=evaluation_result.accuracy_score)
-        log_evaluation(trace_id=trace.id, name='topic', value=evaluation_result.topic)
-        
-        first_ts = trace.spans[0].outputs["_state"]["message_history"][0]["parts"][0]["timestamp"]
-        timestamps.append(first_ts)
-        traces_count = traces_count + 1
+            question = span.inputs.get("question")
+            agent_output = span.outputs.get("output")
+
+            if not question or not agent_output:
+                print(f"Skipping trace {trace.id}: missing question or agent output")
+                continue
+
+            evaluation_result = evaluator.evaluate_response(
+                query=question,
+                agent_output=agent_output,
+                metadata={}
+            )
+
+            log_evaluation(trace_id=trace.id, name='toxicity_score', value=evaluation_result.toxicity_score)
+            log_evaluation(trace_id=trace.id, name='relevancy_score', value=evaluation_result.relevancy_score)
+            log_evaluation(trace_id=trace.id, name='accuracy_score', value=evaluation_result.accuracy_score)
+            log_evaluation(trace_id=trace.id, name='topic', value=evaluation_result.topic)
+
+            first_ts = span.outputs["_state"]["message_history"][0]["parts"][0]["timestamp"]
+            timestamps.append(first_ts)
+            traces_count = traces_count + 1
+        except Exception as e:
+            print(f"Skipping trace {trace.id}: {e}")
+            continue
         
     latest_trace_ts = max(timestamps) if timestamps else None
     print("Processed traces count:")
