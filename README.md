@@ -238,3 +238,42 @@ def evaluate_relevancy(self, query: str, agent_output: str) -> float:
 ```
 
 The overall score is computed as: `(relevancy + accuracy) / 2 * (1 - toxicity)`.
+
+---
+
+## Production Best Practices
+
+For simplicity, this demo stores the evaluation dataset (`sample_questions.csv`) and the vector database (`chroma_db/`) directly in the project repo. In a production setup, both should live in **Domino Datasets** (`/mnt/data/<project>/`) instead:
+
+- **Vector store (`chroma_db/`):** Persisting ChromaDB to a Domino Dataset ensures the index survives across Jobs, Apps, and workspaces without being tied to the Git repo. It also avoids bloating your repo with large binary files and allows multiple executions (e.g., the chat app and evaluation jobs) to share the same index.
+- **Evaluation dataset (`sample_questions.csv`):** Storing test data in a Dataset makes it easy to version, update, and share across team members without committing data files to Git. As your test suite grows, this becomes essential.
+
+To adopt this, update the paths in `rag_agent_config.yaml` or at the top of each script to point to `/mnt/data/<project>/` instead of the script directory.
+
+### Add conversation history to the chat app
+
+The chat app is currently stateless — each request is handled independently with no memory of previous messages. A follow-up like "What's the worst one?" after "What are the side effects?" won't have context. To make it conversational, store message history keyed by `conversation_id` and pass it to the agent:
+
+```python
+from pydantic_ai.messages import ModelRequest, ModelResponse
+
+# In-memory conversation store (use Redis or a DB for production)
+conversations: dict[str, list[ModelRequest | ModelResponse]] = {}
+
+@add_tracing(name='single_question_agent', autolog_frameworks=["pydantic_ai"])
+async def ask_agent(question: str, conversation_id: str):
+    agent = create_agent()
+    deps = create_deps()
+    history = conversations.get(conversation_id, [])
+    result = await agent.run(question, deps=deps, message_history=history)
+    conversations[conversation_id] = result.all_messages()
+    return result
+
+# Add a clear endpoint
+@app.post("/clear")
+async def clear_conversation(request: ChatMessage):
+    conversations.pop(request.conversation_id, None)
+    return {"status": "cleared"}
+```
+
+The key change is `message_history=history` — pydantic-ai replays the prior messages so the LLM sees the full conversation. Add a "New Chat" button in the UI that calls `/clear` to reset.
