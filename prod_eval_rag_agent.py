@@ -7,10 +7,8 @@ from datetime import datetime
 project_name = os.environ.get("DOMINO_PROJECT_NAME")
 timestamp_path = "/mnt/data/" + project_name + "/last_trace_time.txt"
 
-#AGENT_ID = "69432f1be3cd202576bec1b1"
-#VERSION = "6932018a2b87e031b1308fa1"
 
-
+# I only use agent_id to search traces because the version of my app changes so much because of our demo environment.
 AGENT_ID = "69822756c263e445d516bddd"
 #VERSION = "69822756c263e445d516bddf"
 
