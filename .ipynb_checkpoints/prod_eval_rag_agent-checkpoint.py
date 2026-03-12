@@ -10,7 +10,7 @@ timestamp_path = "/mnt/data/" + project_name + "/last_trace_time.txt"
 
 # I only use agent_id to search traces because the version of my app changes so much due to our demo environment.
 # replace with the agent_id provided on the domino agent dashboard, click the "Evaluation setup" button in the top corner.
-AGENT_ID = "69822756c263e445d516bddd"
+AGENT_ID = "69432f1be3cd202576bec1b1"
 #VERSION = "69822756c263e445d516bddf"
 
 def read_or_init_timestamp(path: str) -> float:
