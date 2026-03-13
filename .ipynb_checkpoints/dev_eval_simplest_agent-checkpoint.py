@@ -1,5 +1,5 @@
 from evaluation_library import AgentEvaluator
-#from simplest_agent import simplest_agent
+
 from simple_rag_agent import create_agent, create_deps, retrieval_distance_accumulator
 from domino.agents.tracing import add_tracing, search_traces
 from domino.agents.logging import DominoRun,log_evaluation
@@ -68,25 +68,30 @@ def judge_single_question(span):
     
     print(f"\nLogged retrieval distance aggregates to run:")
     print(retrieval_distance_accumulator)
-    print(f"   Mean: {sum(retrieval_distance_accumulator) / len(retrieval_distance_accumulator):.4f}")
-    print(f"   Min:  {min(retrieval_distance_accumulator):.4f}")
-    print(f"   Max:  {max(retrieval_distance_accumulator):.4f}")
+    if retrieval_distance_accumulator:
+        print(f"   Mean: {sum(retrieval_distance_accumulator) / len(retrieval_distance_accumulator):.4f}")
+        print(f"   Min:  {min(retrieval_distance_accumulator):.4f}")
+        print(f"   Max:  {max(retrieval_distance_accumulator):.4f}")
+    else:
+        print("   No retrieval distances recorded")
     print("#### EVALUATION SCORES ####")
-    
+
     # Return the evaluation metrics with proper naming
-    return {
+    result = {
         "question_id": inputs['data_point']['question_id'],
         "category": category,
         #"question_status": "success",
         "toxicity_score": evaluation_result.toxicity_score,
-        "relevancy_score": evaluation_result.relevancy_score, 
+        "relevancy_score": evaluation_result.relevancy_score,
         "accuracy_score": evaluation_result.accuracy_score,
         "overall_score": evaluation_result.overall_score,
-        "retrieval_mean_distance": sum(retrieval_distance_accumulator) / len(retrieval_distance_accumulator),
-        "retrieval_min_distance": min(retrieval_distance_accumulator),
-        "retrieval_max_distance": max(retrieval_distance_accumulator),
         # "has_evaluation": True
     }
+    if retrieval_distance_accumulator:
+        result["retrieval_mean_distance"] = sum(retrieval_distance_accumulator) / len(retrieval_distance_accumulator)
+        result["retrieval_min_distance"] = min(retrieval_distance_accumulator)
+        result["retrieval_max_distance"] = max(retrieval_distance_accumulator)
+    return result
 
 
 @add_tracing(name='simple_rag_agent', autolog_frameworks=["pydantic_ai"], evaluator=judge_single_question)
