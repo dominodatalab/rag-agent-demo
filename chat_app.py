@@ -84,8 +84,9 @@ async def chat(request: ChatMessage) -> ChatResponse:
     """
     try:
         # Run the agent with the user's message
-        with DominoRun(agent_config_path=config_path) as run:
-            result = await ask_agent(request.message)
+        # with DominoRun(agent_config_path=config_path) as run:
+        # no need for dominorun context for production agent deployment
+        result = await ask_agent(request.message)
 
             
         # Generate or use existing conversation ID
