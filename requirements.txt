@@ -1,0 +1,9 @@
+chromadb
+fastapi
+mlflow
+pydantic
+pydantic-ai
+pypdf
+PyYAML
+requests
+uvicorn

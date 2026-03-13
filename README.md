@@ -22,7 +22,8 @@ For full platform documentation see: [Build and Evaluate Agentic Systems](https:
 ├── dev_eval_simplest_agent.py   # Dev workflow: batch eval with Domino tracing
 ├── prod_eval_rag_agent.py       # Prod workflow: evaluate live traces retroactively
 ├── chat_app.py                  # FastAPI chat UI with production tracing
-└── app.sh                       # Domino App launcher
+├── app.sh                       # Domino App launcher
+└── requirements.txt             # Python package dependencies
 ```
 
 ### File Descriptions
@@ -135,6 +136,14 @@ This is useful for debugging retrieval quality at the tool-call level, separate 
 ---
 
 ## Usage
+
+### 0. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+In a Domino workspace you may need to run this manually. For Apps, Agent Deploys, and Jobs, these may be installed automatically depending on your Domino environment configuration.
 
 ### 1. Configure the agent
 
